@@ -25,7 +25,7 @@
 
 ### Домашнее задание
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DeepLearningSchool/part_2_nlp/blob/main/week_06_transfer_learning/Homework/Seminar_Attention_and_Transformers.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DeepLearningSchool/part_2_nlp/blob/main/week_06_transfer_learning/Homework/[homework]Attention_and_transformers.ipynb)
 
 В этом домашнем задании вам предстоит решить задачу классификации математических задач по темам. 
 

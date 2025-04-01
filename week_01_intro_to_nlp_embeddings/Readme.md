@@ -25,7 +25,7 @@
 
 ### Домашнее задание
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DeepLearningSchool/part_2_nlp/blob/main/week_01_intro_to_nlp_embeddings/Homework/hw_1_simple_embeddings(20).ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DeepLearningSchool/part_2_nlp/blob/main/week_01_intro_to_nlp_embeddings/Homework/hw_1_simple_embeddings.ipynb)
 
 В этом задании вам предстоит познакомиться с задачей ранжирования. Вам предстоит решить задачу ранжирования вопросов с помощью эмбеддингов. 
 

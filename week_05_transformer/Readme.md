@@ -17,7 +17,7 @@
 
 
 ### Семинар
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DeepLearningSchool/part_2_nlp/blob/main/week_01_intro_to_nlp_embeddings/Practice/Seminar_Attention_and_Transformers.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DeepLearningSchool/part_2_nlp/blob/main/week_05_transformer/Practice/Seminar_Attention_and_Transformers.ipynb)
 
 
 В этом видео мы рассмотрим слой self-attention и поговорим о реализации BERT.

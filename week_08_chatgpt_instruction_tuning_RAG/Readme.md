@@ -1,4 +1,4 @@
-## Материалы модуля 5
+## Материалы модуля 8
 
 <div align="center">
   <img src="../images/dls.png">

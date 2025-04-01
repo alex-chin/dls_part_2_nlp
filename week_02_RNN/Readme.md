@@ -26,7 +26,7 @@
 
 ### Домашнее задание
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DeepLearningSchool/part_2_nlp/blob/main/week_02_RNN/Homework/hw_text_classification.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DeepLearningSchool/part_2_nlp/blob/main/week_02_RNN/Homework/hw_2_text_classification.ipynb)
 
 В этом домашнем задании вам предстоит решить задачу классификации текстов новостей по темам.
 
