@@ -29,3 +29,7 @@
 
 8. [GPT-based модели и RAG](./week_08_chatgpt_instruction_tuning_RAG/README.md)
 
+9. [Интерпретируемость трансформеров](./week_09_interpretibiblity/README.md)
+
+10. [Детекция сгенерированных текстов](./week_10_generated_text_detection/README.md)
+
