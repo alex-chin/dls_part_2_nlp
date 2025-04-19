@@ -1,4 +1,4 @@
-## Материалы модуля 8
+## Материалы модуля 10
 
 <div align="center">
   <img src="../images/dls.png">
@@ -27,5 +27,3 @@
 ### Домашнее задание
 
 В этом домашнем задании вам предстоит поучаствовать в [кагл соревновании](https://www.kaggle.com/competitions/you-are-bot). 
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DeepLearningSchool/part_2_nlp/blob/main/week_08_chatgpt_instruction_tuning_RAG/Homework/hf_rag.ipynb)
