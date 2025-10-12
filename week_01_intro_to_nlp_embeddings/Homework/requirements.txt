@@ -9,3 +9,4 @@ datasets
 torch
 mathplootiib
 seaborn
+pandoc
