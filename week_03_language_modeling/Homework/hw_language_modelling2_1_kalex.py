@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from tqdm.auto import tqdm
 from datasets import load_dataset
@@ -15,6 +14,7 @@ from collections import Counter
 from typing import List
 
 import seaborn
+import matplotlib.pyplot as plt
 
 from torch.optim import Adam
 from tqdm import tqdm
@@ -272,18 +272,15 @@ def train_model(model: nn.Module, train_dataloader: DataLoader, eval_dataloader:
         train_bar = tqdm(train_dataloader, desc=f'Epoch {epoch + 1}/{num_epochs} [Train]')
 
         for batch_idx, batch in enumerate(train_bar):
-            # Перемещаем данные на устройство
             input_ids = batch['input_ids'].to(device)
             target_ids = batch['target_ids'].to(device)
 
-            # Обнуляем градиенты
             optimizer.zero_grad()
 
-            # Прямой проход
             if hasattr(model, 'init_hidden'):
                 # Для моделей с возможностью инициализации скрытого состояния
                 hidden = model.init_hidden(input_ids.size(0), device)
-                logits, _ = model(input_ids, hidden)
+                logits = model(input_ids, hidden)
             else:
                 logits = model(input_ids)
 
@@ -291,16 +288,12 @@ def train_model(model: nn.Module, train_dataloader: DataLoader, eval_dataloader:
             logits_flat = logits.reshape(-1, vocab_size)
             targets_flat = target_ids.reshape(-1)
 
-            # Вычисляем потери
             loss = criterion(logits_flat, targets_flat)
-
-            # Обратный проход
             loss.backward()
 
-            # Обновляем веса
             optimizer.step()
 
-            # Собираем статистику
+            # Здесь показывается не “перплексия за эпоху”, а мгновенная оценка для текущего батча: exp(loss.item()).
             batch_tokens = targets_flat.ne(pad_id).sum().item()  # исключаем padding
             epoch_train_loss += loss.item() * batch_tokens
             total_tokens += batch_tokens
@@ -343,7 +336,11 @@ def train_model(model: nn.Module, train_dataloader: DataLoader, eval_dataloader:
 
 
 def evaluate(model, criterion, dataloader, vocab_size: int, device: torch.device, pad_id: int) -> float:
-    """Вычисление perplexity на валидационном наборе"""
+    """
+    
+    Вычисление perplexity на валидационном наборе
+    
+    """
     model.eval()
     total_loss = 0.0
     total_tokens = 0
@@ -356,7 +353,7 @@ def evaluate(model, criterion, dataloader, vocab_size: int, device: torch.device
             # Прямой проход
             if hasattr(model, 'init_hidden'):
                 hidden = model.init_hidden(input_ids.size(0), device)
-                logits, _ = model(input_ids, hidden)
+                logits = model(input_ids, hidden)
             else:
                 logits = model(input_ids)
 
@@ -391,19 +388,10 @@ def get_config() -> dict:
         'WORD_THRESHOLD': 32,
         'VOCAB_SIZE': 40000,
         'batch_size': 128,
-        'num_epochs': 5,
+        'num_epochs': 1,
         'learning_rate': 0.001,
         'seed': 42,
     }
-
-
-def setup_environment() -> None:
-    seaborn.set(palette='summer')
-    nltk.download('punkt')
-
-
-def load_imdb_dataset():
-    return load_dataset('imdb')
 
 
 def build_vocab_and_sentences(dataset, word_threshold: int, vocab_size: int):
@@ -449,42 +437,25 @@ def make_dataloaders(train_dataset, eval_dataset, test_dataset, pad_id: int, bat
         test_dataset, collate_fn=collate_fn_with_padding(pad_id), batch_size=batch_size)
     return train_dataloader, eval_dataloader, test_dataloader
 
-
-def build_model(vocab_size: int) -> nn.Module:
-    return LanguageModel(vocab_size=vocab_size)
-
-
-def train_and_evaluate(model: nn.Module,
-                       train_dataloader: DataLoader,
-                       eval_dataloader: DataLoader,
-                       vocab_size: int,
-                       num_epochs: int,
-                       learning_rate: float,
-                       pad_id: int,
-                       device):
-    return train_model(
-        model=model,
-        train_dataloader=train_dataloader,
-        eval_dataloader=eval_dataloader,
-        vocab_size=vocab_size,
-        num_epochs=num_epochs,
-        learning_rate=learning_rate,
-        pad_id=pad_id,
-        device=device
-    )
-
+class LanguageModelInit(LanguageModel):
+    def init_hidden(self, batch_size: int, device: torch.device) -> torch.Tensor:
+        """Инициализация скрытого состояния"""
+        return torch.zeros(1, batch_size, self.hidden_dim, device=device)
 
 def run_experiment():
-    setup_environment()
+    seaborn.set(palette='summer')
+    nltk.download('punkt')
     device = get_device()
     print('device:', device)
 
     cfg = get_config()
-    dataset = load_imdb_dataset()
+    dataset = load_dataset('imdb')
 
-    vocab, processed_sentences, word_frequencies = build_vocab_and_sentences(
-        dataset, cfg['WORD_THRESHOLD'], cfg['VOCAB_SIZE']
-    )
+    threshold = cfg['WORD_THRESHOLD']
+    size = cfg['VOCAB_SIZE']
+
+    vocab, processed_sentences, word_frequencies = (
+        preprocess_data(dataset, word_threshold=threshold, vocab_size=size))
 
     assert '<unk>' in vocab
     assert '<bos>' in vocab
@@ -508,7 +479,8 @@ def run_experiment():
         train_dataset, eval_dataset, test_dataset, pad_id, cfg['batch_size']
     )
 
-    model = build_model(vocab_size=vocab_size)
+
+    model = LanguageModelInit(vocab_size=vocab_size)
 
     results = train_model(
         model=model,
@@ -521,18 +493,60 @@ def run_experiment():
         device=device
     )
 
-    results = train_and_evaluate(
-        model=model,
-        train_dataloader=train_dataloader,
-        eval_dataloader=eval_dataloader,
-        vocab_size=vocab_size,
-        num_epochs=cfg['num_epochs'],
-        learning_rate=cfg['learning_rate'],
-        pad_id=pad_id,
-        device=device
-    )
-
     print(f"Лучшая perplexity: {results['best_eval_ppl']:.2f}")
+    
+    # Построение графиков
+    plot_training_results(results)
+
+
+def plot_training_results(results: dict):
+    """
+    Построение графиков результатов обучения
+    
+    Args:
+        results: Словарь с результатами обучения, содержащий train_losses и eval_perplexities
+    """
+    train_losses = results['train_losses']
+    eval_perplexities = results['eval_perplexities']
+    
+    # Создаем фигуру с двумя подграфиками
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+    
+    # График 1: Train Loss
+    epochs = range(1, len(train_losses) + 1)
+    ax1.plot(epochs, train_losses, 'b-', linewidth=2, marker='o', markersize=6)
+    ax1.set_title('Training Loss', fontsize=14, fontweight='bold')
+    ax1.set_xlabel('Epoch', fontsize=12)
+    ax1.set_ylabel('Loss', fontsize=12)
+    ax1.grid(True, alpha=0.3)
+    ax1.set_xticks(epochs)
+    
+    # График 2: Evaluation Perplexity
+    ax2.plot(epochs, eval_perplexities, 'r-', linewidth=2, marker='s', markersize=6)
+    ax2.set_title('Evaluation Perplexity', fontsize=14, fontweight='bold')
+    ax2.set_xlabel('Epoch', fontsize=12)
+    ax2.set_ylabel('Perplexity', fontsize=12)
+    ax2.grid(True, alpha=0.3)
+    ax2.set_xticks(epochs)
+    
+    # Добавляем значения на графики
+    for i, (loss, ppl) in enumerate(zip(train_losses, eval_perplexities)):
+        ax1.annotate(f'{loss:.3f}', (epochs[i], loss), textcoords="offset points", 
+                    xytext=(0,10), ha='center', fontsize=9)
+        ax2.annotate(f'{ppl:.1f}', (epochs[i], ppl), textcoords="offset points", 
+                    xytext=(0,10), ha='center', fontsize=9)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    # Выводим итоговую статистику
+    print("\n" + "="*50)
+    print("📊 ИТОГОВАЯ СТАТИСТИКА ОБУЧЕНИЯ")
+    print("="*50)
+    print(f"🎯 Лучшая perplexity: {results['best_eval_ppl']:.2f}")
+    print(f"📈 Финальная train loss: {results['final_train_loss']:.4f}")
+    print(f"📉 Улучшение perplexity: {eval_perplexities[0]:.2f} → {eval_perplexities[-1]:.2f}")
+    print(f"📉 Улучшение loss: {train_losses[0]:.4f} → {train_losses[-1]:.4f}")
 
 
 if __name__ == '__main__':
