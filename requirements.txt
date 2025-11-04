@@ -9,4 +9,5 @@ datasets
 torch
 mathplootiib
 seaborn
-pandoc
+transformers
+openpyxl
