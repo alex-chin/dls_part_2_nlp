@@ -1,4 +1,4 @@
-﻿;problem_text;topic
+﻿id;problem_text;topic
 0;To prove that the sum of the numbers of the exact square cannot be equal to 5.;number_theory
 1;( b) Will the statement of the previous challenge remain true if Petia and Wasa originally planned four natural numbers?;number_theory
 2;The quadratic three-member graph with the coefficients has two points with the coordinates. Show that if the distance between them is the whole number, then the fraction is parallel to the abscisse axis.;polynoms
